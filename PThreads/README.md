@@ -10,10 +10,14 @@
   - 80 % Member — 10 % Insert — 10 % Delete *(más operaciones de escritura)*
 
 ---
+## Resultados del Libro
+<img width="488" height="451" alt="image" src="https://github.com/user-attachments/assets/4acdcb69-f30d-4c9d-a9c1-988c10af00ad" />
 
+
+---
 ## Resultados — 99.9 % Member
 
-| Hilos | Tiempo Mutex (s) | Tiempo RWLock (s) | Aceleración RWLock |
+| Hilos | Tiempo One Mutex for entire list | Tiempo ReadWrite Lock (s) | Aceleración RWLock |
 |-------|-------------------|-------------------|--------------------|
 | 1     | 0.017105          | 0.016977          | 1.01×              |
 | 2     | 0.060067          | 0.061119          | 0.98×              |
@@ -27,7 +31,7 @@ Cuando la carga es mayoritariamente de lectura, `rwlock` permite concurrencia en
 
 ##  Resultados — 80 % Member / 10 % Insert / 10 % Delete
 
-| Hilos | Tiempo Mutex (s) | Tiempo RWLock (s) | Aceleración RWLock |
+| Hilos | Tiempo One Mutex for entire list | Tiempo ReadWrite Lock (s) | Aceleración RWLock |
 |-------|-------------------|-------------------|--------------------|
 | 1     | 0.384180          | 0.400975          | 0.96×              |
 | 2     | 0.938453          | 0.934703          | 1.00×              |
@@ -38,18 +42,10 @@ Cuando hay más operaciones de escritura, el `rwlock` **pierde ventaja** porque 
 
 ---
 
-## Observaciones
-
-- Un solo **mutex** simplifica el diseño y ofrece buen rendimiento cuando hay escrituras frecuentes.  
-- **RWLock** es útil en escenarios de lectura intensiva, pero no escala mejor cuando hay muchas escrituras.  
-- A medida que crece el número de hilos, el tiempo total crece casi linealmente debido a la **sección crítica compartida**.
-
----
 
 ## Conclusiones
 
 -  Para cargas **dominadas por lecturas**, los *read-write locks* permiten una mejora leve al permitir acceso concurrente de múltiples hilos lectores.  
 -  Para cargas **mixtas con escrituras frecuentes**, la ganancia desaparece ya que las escrituras requieren exclusividad.  
--  Un mutex único tiene un costo bajo y es más simple de implementar, mientras que `rwlock` ofrece beneficios **solo en escenarios de lectura intensiva**.
-
+-  Un mutex único tiene un costo bajo y es más simple de implementar, mientras que `rwlock` ofrece beneficios **solo en escenarios de lectura intensiva** como lo menciona en el libro.
 ---
