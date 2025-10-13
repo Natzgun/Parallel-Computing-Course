@@ -14,9 +14,9 @@ struct node* head = NULL;
 pthread_rwlock_t rwlock;
 int nthreads = 1;
 
-double member_frac = 0.8;
-double insert_frac = 0.1;
-double delete_frac = 0.1;
+double member_frac = 0.99;
+double insert_frac = 0.005;
+double delete_frac = 0.005;
 
 void Push(struct node **headRef, int data) {
   struct node *newNode = malloc(sizeof(struct node));
@@ -104,7 +104,7 @@ int ThreadSafeDelete(int value) {
 
 void* ThreadFunc(void* rank) {
   long my_rank = (long) rank;
-  int ops_per_thread = TOTAL_OPS / nthreads;
+  int ops_per_thread = TOTAL_OPS;
 
   for (int i = 0; i < ops_per_thread; i++) {
     int val = rand() % 10000;
