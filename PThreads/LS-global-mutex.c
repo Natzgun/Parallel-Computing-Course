@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h>
+
+#define TOTAL_OPS 100000
 
 struct node {
   int data;
@@ -9,6 +12,11 @@ struct node {
 
 struct node* head = NULL;
 pthread_mutex_t mutex;
+int nthreads = 1;
+
+double member_frac = 0.99;
+double insert_frac = 0.005;
+double delete_frac = 0.005;
 
 void Push(struct node **headRef, int data) {
   struct node *newNode = malloc(sizeof(struct node));
@@ -24,7 +32,6 @@ int Member(int value, struct node* curr_head_p) {
     else
       break;
   }
-
   if (!curr_head_p || curr_head_p->data > value)
     return 0;
   else
@@ -96,16 +103,20 @@ int ThreadSafeDelete(int value) {
 
 void* ThreadFunc(void* rank) {
   long my_rank = (long) rank;
+  int ops_per_thread = TOTAL_OPS;
 
-  ThreadSafeInsert(10 + my_rank);
-  ThreadSafeInsert(20 + my_rank);
-  ThreadSafeInsert(30 + my_rank);
+  for (int i = 0; i < ops_per_thread; i++) {
+    int val = rand() % 10000;
+    double prob = (double) rand() / RAND_MAX;
 
-  int found = ThreadSafeMember(20 + my_rank);
-  printf("Thread %ld: Member(20+rank) = %d\n", my_rank, found);
-
-  ThreadSafeDelete(10 + my_rank);
-
+    if (prob < member_frac) {
+      ThreadSafeMember(val);
+    } else if (prob < member_frac + insert_frac) {
+      ThreadSafeInsert(val);
+    } else {
+      ThreadSafeDelete(val);
+    }
+  }
   return NULL;
 }
 
@@ -120,20 +131,41 @@ void PrintList(struct node* head) {
 }
 
 int main(int argc, char *argv[]) {
-  pthread_t threads[4];
+  if (argc < 2) {
+    fprintf(stderr, "Uso: %s <num_threads> [member_frac insert_frac delete_frac]\n", argv[0]);
+    exit(EXIT_FAILURE);
+  }
+
+  nthreads = atoi(argv[1]);
+  if (argc == 5) {
+    member_frac = atof(argv[2]);
+    insert_frac = atof(argv[3]);
+    delete_frac = atof(argv[4]);
+  }
+
+  srand((unsigned int) time(NULL));
+  pthread_t threads[nthreads];
   pthread_mutex_init(&mutex, NULL);
 
-  for (long i = 0; i < 4; i++) {
+  struct timespec start, end;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
+  for (long i = 0; i < nthreads; i++) {
     pthread_create(&threads[i], NULL, ThreadFunc, (void*) i);
   }
 
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < nthreads; i++) {
     pthread_join(threads[i], NULL);
   }
 
-  pthread_mutex_lock(&mutex);
-  PrintList(head);
-  pthread_mutex_unlock(&mutex);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+  double elapsed = (end.tv_sec - start.tv_sec) +
+                   (end.tv_nsec - start.tv_nsec) / 1e9;
+
+  printf("\nTiempo total: %.6f segundos\n", elapsed);
+  printf("Threads: %d | Operaciones: %d | Distribución: %.0f%% Member, %.0f%% Insert, %.0f%% Delete\n",
+         nthreads, TOTAL_OPS,
+         member_frac * 100, insert_frac * 100, delete_frac * 100);
 
   pthread_mutex_destroy(&mutex);
   return 0;
