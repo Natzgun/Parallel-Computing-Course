@@ -40,6 +40,14 @@ Cuando hay más operaciones de escritura, el `rwlock` **sigue mostrando mejor re
 
 ---
 
+## Resultados para Matrix por vector usando 4 hilos
+
+| Datos | Tiempo |
+|------------|------------|
+| 8000000 x 8     |  0.047860    |
+| 8000 x 8000     |  0.040008    |
+| 8 x 8000000     |  0.096977    |
+
 ## Conclusiones
 
 -  Para cargas **dominadas por lecturas**, los *read-write locks* escalan mucho mejor que un mutex global, ya que múltiples hilos pueden leer al mismo tiempo sin bloquearse.  
