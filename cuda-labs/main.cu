@@ -61,10 +61,16 @@ int main() {
   * operaciones para cubrir la totalidad de operaciones usamos el techo
   * para dar garantia de que cada operacion ocupara un thread respectivamente
    */
-  int num_blocks = (N + 256 - 1) / 256;
+  // int num_blocks = (N + 256 - 1) / 256;
 
   // Se hace la llamada al kernel
-  dotProductVector<<<num_blocks, 256>>>(d_out, d_a, d_b, N);
+  // dotProductVector<<<num_blocks, 256>>>(d_out, d_a, d_b, N);
+
+  /* Usando grids y bloques */
+  dim3 dimGrid(ceil(N/256.0), 1 ,1);
+  dim3 dimBlock(256, 1, 1);
+
+  dotProductVector<<<dimGrid, dimBlock>>>(d_out, d_a, d_b, N);
 
   /* Como el kernel se ejecuta de forma asincrónica en la GPU,
    * podemos esperar a que la GPU termine su trabajo para obtener
