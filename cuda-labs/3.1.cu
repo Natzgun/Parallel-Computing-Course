@@ -1,7 +1,5 @@
 #include <cstdio>
 
-#include <cstdio>
-
 // KERNEL B: thread per data
 /* * PROS:
  * - Máximo Paralelismo: Ocupación total de la GPU (N*N hilos), cumple con la masividad.
