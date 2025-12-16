@@ -21,7 +21,6 @@ __global__ void addMatrixB(float *out, float *a, float *b, int width) {
 
 // KERNEL C: thread per row
 /* * PROS:
- * - Coalescencia Buena: El acceso dentro del bucle es secuencial (row*width + i) permitiendo cargas eficientes.
  * * CONTRAS:
  * - Bajo Paralelismo: Solo lanza 'width' hilos. Desperdicia la capacidad masiva de la GPU.
  * - Desbalanceo: Si las filas son muy largas, un solo hilo carga con mucho trabajo secuencial.
@@ -39,8 +38,8 @@ __global__ void addMatrixC(float *out, float *a, float *b, int width) {
 // KERNEL D: thread per column
 /* * PROS:
  * * CONTRAS:
- * - Pésima Coalescencia debido a que los hilos leen saltando 'width' posiciones en memoria.
- * - Bajo Paralelismo: Igual que el C subutiliza los núcleos de la GPU.
+ * - Los hilos se leen saltando 'width' posiciones en memoria.
+ * - Bajo Paralelismo: Igual que el kernel  C subutiliza los núcleos de la GPU.
  */
 __global__ void addMatrixD(float *out, float *a, float *b, int width) {
   if (int col = blockIdx.x * blockDim.x + threadIdx.x; col < width) {
